@@ -1,29 +1,36 @@
 import express from 'express'
-const app = express();
-const port = 10000;
 import AdminJS, {ComponentLoader} from 'adminjs'
-import { dark, light, noSidebar } from '@adminjs/themes'
+import {dark, light, noSidebar} from '@adminjs/themes'
 import AdminJSExpress from '@adminjs/express'
 import AdminJSSequelize from '@adminjs/sequelize'
-import { sequelize} from './database.js';
+import {sequelize} from './database.js';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import cors from 'cors';
 import Category from './models/category.js';
 import User from './models/user.js';
-import Main from './models/main.js';
 import Post from './models/post.js';
 import Image from './models/image.js'
 import multer from 'multer';
 import uploadFeature from '@adminjs/upload';
 import * as url from "url";
 import * as path from "path";
+import PostCategories from "./models/post_categories.js";
+import Main from "./models/main.js";
+
 const componentLoader = new ComponentLoader()
+const app = express();
+const port = 10000;
+
+
 const upload = multer({ dest: 'uploads/' });
 dotenv.config();
 
+
 Category.belongsTo(Image, { foreignKey: 'img_id', as: 'image' });
+PostCategories.belongsTo(Post, {foreignKey: 'postId', as: 'post'});
+PostCategories.belongsTo(Category, {foreignKey: 'categoryId', as: 'category'});
 
 const localProvider = {
     bucket: 'uploads',

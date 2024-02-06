@@ -1,12 +1,13 @@
-import { DataTypes } from 'sequelize';
+import {DataTypes} from 'sequelize';
 import {sequelize} from "../database.js";
+
 const Image = sequelize.define('image', {
     title: {
         type: DataTypes.STRING,
         allowNull: false
     },
     bucket: {
-        type:DataTypes.STRING,
+        type: DataTypes.STRING,
         isVisible: false,
     },
     mime: {

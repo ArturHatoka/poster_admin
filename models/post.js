@@ -1,4 +1,4 @@
-import { DataTypes } from 'sequelize';
+import {DataTypes} from 'sequelize';
 import {sequelize} from "../database.js";
 
 const Post = sequelize.define('post', {
@@ -27,7 +27,6 @@ const Post = sequelize.define('post', {
         type: DataTypes.STRING(255),
         allowNull: true
     }
-}, {
-});
+}, {});
 
 export default Post;

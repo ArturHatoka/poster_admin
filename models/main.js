@@ -1,4 +1,4 @@
-import { DataTypes } from 'sequelize';
+import {DataTypes} from 'sequelize';
 import {sequelize} from "../database.js";
 
 const Main = sequelize.define('main', {
@@ -15,7 +15,6 @@ const Main = sequelize.define('main', {
         type: DataTypes.STRING(255),
         allowNull: true
     }
-}, {
-});
+}, {});
 
 export default Main;
