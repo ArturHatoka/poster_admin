@@ -12,6 +12,8 @@ import session from 'express-session';
 import cors from 'cors';
 import Category from './models/category.js';
 import User from './models/user.js';
+import Main from './models/main.js';
+import Post from './models/post.js';
 import Image from './models/image.js'
 import multer from 'multer';
 import uploadFeature from '@adminjs/upload';
@@ -78,7 +80,7 @@ const ImageResource = {
         uploadFeature({
             componentLoader,
             provider: { local: localProvider },
-            properties: { file: 'file', filePath: 'filePath', key: 'key', bucket: 'bucket',size: 'size', mimeType: 'mime' },
+            properties: { file: 'file', filePath: 'filePath', key: 'key', bucket: 'bucket', size: 'size', mimeType: 'mime' },
             validation: { mimeTypes: ['image/png', 'application/pdf', 'audio/mpeg', 'image/jpeg'] },
         }),
     ],
