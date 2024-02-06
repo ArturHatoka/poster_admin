@@ -40,7 +40,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: !!process.env.PROD }
 }));
 
 sequelize.sync({ force: false })
@@ -128,7 +128,7 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
 }, null, {
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // Используем secure cookies в продакшене
+    cookie: { secure: !!process.env.PROD } // Используем secure cookies в продакшене
 });
 
 app.use(adminJs.options.rootPath, adminRouter);
