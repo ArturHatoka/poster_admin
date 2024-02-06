@@ -1,22 +1,41 @@
 import express from 'express'
 const app = express();
-const port = 3030;
-import AdminJS from 'adminjs'
+const port = 10000;
+import AdminJS, {ComponentLoader} from 'adminjs'
 import { dark, light, noSidebar } from '@adminjs/themes'
 import AdminJSExpress from '@adminjs/express'
 import AdminJSSequelize from '@adminjs/sequelize'
-import { Sequelize, DataTypes } from 'sequelize';
+import { sequelize} from './database.js';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import cors from 'cors';
+import Category from './models/category.js';
+import User from './models/user.js';
+import Image from './models/image.js'
+import multer from 'multer';
+import uploadFeature from '@adminjs/upload';
+import * as url from "url";
+import * as path from "path";
+const componentLoader = new ComponentLoader()
+const upload = multer({ dest: 'uploads/' });
+dotenv.config();
+
+Category.belongsTo(Image, { foreignKey: 'img_id', as: 'image' });
+
+const localProvider = {
+    bucket: 'uploads',
+    opts: {
+        baseUrl: '/uploads',
+    },
+};
+
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
 }));
-dotenv.config();
 app.use(express.json());
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -24,22 +43,12 @@ app.use(session({
     cookie: { secure: false }
 }));
 
-const sequelize = new Sequelize('postgres://postgres:123@localhost:5432/lucky');
+sequelize.sync({ force: false })
+    .then(() => console.log("Таблицы были успешно синхронизированы"))
+    .catch((error) => console.error("Ошибка при синхронизации таблиц:", error));
 
-const User = sequelize.define('User', {
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-}, {});
-
-sequelize.sync();
 AdminJS.registerAdapter(AdminJSSequelize);
+
 const UserResource = {
     resource: User,
     options: {
@@ -62,30 +71,50 @@ const UserResource = {
         },
     },
 }
+
+const ImageResource = {
+    resource: Image,
+    features: [
+        uploadFeature({
+            componentLoader,
+            provider: { local: localProvider },
+            properties: { file: 'file', key: 's3Key', bucket: 'bucket', mimeType: 'mime' },
+            validation: { mimeTypes: ['image/png', 'application/pdf', 'audio/mpeg', 'image/jpeg'] },
+        }),
+    ],
+}
+const CategoryResource = {
+    resource: Category,
+    options: {
+        // Настройки ресурса категории
+    },
+}
+
 const adminJs = new AdminJS({
     defaultTheme: dark.id,
     availableThemes: [dark, light, noSidebar],
     databases: [sequelize],
     rootPath: '/admin',
+    componentLoader,
     resources: [
         UserResource,
+        ImageResource,
+        CategoryResource,
     ],
 });
 
-// Функция для проверки пароля (примерная реализация, предполагается, что пароль уже хеширован)
 const authenticate = async (email, password) => {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-        return false; // Пользователь не найден
+        return false;
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        return false; // Пароль не совпадает
+        return false;
     }
-    return user; // Пользователь аутентифицирован
+    return user;
 };
 
-// Построение аутентифицированного роутера для AdminJS
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
     authenticate: async (email, password) => {
         const user = await authenticate(email, password);
@@ -101,8 +130,15 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
     saveUninitialized: true,
     cookie: { secure: false } // Используем secure cookies в продакшене
 });
+
 app.use(adminJs.options.rootPath, adminRouter);
 
-app.get('/', (req, res) => res.send('Hello World!'));
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+app.use(express.static(path.join(__dirname, 'uploads')));
+app.get('/', (req, res) => res.send('Кто тут?'));
 
+app.post('/upload', upload.single('image'), function (req, res, next) {
+    // req.file - файл `image`
+    // Здесь код для обработки загруженного файла и сохранения его данных в базе
+});
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`));
