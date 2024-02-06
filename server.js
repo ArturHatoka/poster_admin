@@ -74,6 +74,9 @@ const UserResource = {
 
 const ImageResource = {
     resource: Image,
+    options: {
+        listProperties: ['fileUrl', 'mimeType'],
+    },
     features: [
         uploadFeature({
             componentLoader,
@@ -114,7 +117,6 @@ const authenticate = async (email, password) => {
     }
     return user;
 };
-
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
     authenticate: async (email, password) => {
         const user = await authenticate(email, password);

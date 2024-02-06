@@ -6,7 +6,8 @@ const Image = sequelize.define('image', {
         allowNull: false
     },
     title: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false
     },
 }, {});
 
