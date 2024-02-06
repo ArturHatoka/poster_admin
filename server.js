@@ -78,11 +78,8 @@ const ImageResource = {
         uploadFeature({
             componentLoader,
             provider: { local: localProvider },
-            properties: { file: 'file', key: 's3Key', bucket: 'bucket', mimeType: 'mime' },
+            properties: { file: 'file', filePath: 'filePath', key: 'key', bucket: 'bucket',size: 'size', mimeType: 'mime' },
             validation: { mimeTypes: ['image/png', 'application/pdf', 'audio/mpeg', 'image/jpeg'] },
-            uploadPath: (record, filename) => (
-                `upload/${record.id()}/${filename}`
-            ),
         }),
     ],
 }
